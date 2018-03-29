@@ -10,16 +10,10 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "build:client-and-server-bundles": "ng build --prod && ng build --prod --app 1 --output-hashing=false",
-    "build:prerender": "yarn run build:client-and-server-bundles && yarn run webpack:server && yarn run generate:prerender",
     "build:ssr": "yarn run build:client-and-server-bundles && yarn run webpack:server",
-    "generate:prerender": "cd dist && node prerender",
     "webpack:server": "webpack --config webpack.server.config.js --progress --colors",
-    "serve:prerender": "cd dist/browser && http-server",
     "serve:ssr": "node dist/server"
   },
-  "precommit": [
-    "lint"
-  ],
   "private": true,
   "dependencies": {
     "@angular/animations": "^5.2.0",
@@ -57,9 +51,7 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
-    "pre-commit": "^1.2.2",
     "protractor": "~5.1.2",
-    "reflect-metadata": "^0.1.12",
     "ts-loader": "^2.3.7",
     "ts-node": "~4.1.0",
     "tslint": "~5.9.1",
