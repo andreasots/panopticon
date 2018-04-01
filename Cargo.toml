@@ -4,8 +4,21 @@ version = "0.1.0"
 authors = ["Andreas Ots <qrpth@qrpth.eu>"]
 
 [dependencies]
+argon2rs = "0.2.5"
+chrono = "0.4.1"
+diesel = { version = "1.1.1", features = ["chrono", "postgres", "r2d2"] }
+dotenv = "0.11.0"
 elastic_reqwest = "0.20.9"
+futures = "0.1.20"
 gotham = "0.2.0"
 gotham_derive = "0.2.0"
+gotham_serde_json_body_parser = "0.2.0"
+hyper = "0.11.24"
 json_str = "0.5.1"
+rand = "0.5.0-pre.0"
 reqwest = "0.8.5"
+serde = "1.0.36"
+serde_derive = "1.0.36"
+
+[patch.crates-io]
+argon2rs = { git = "https://github.com/bryant/argon2rs", branch = "variant-argon2id" }
