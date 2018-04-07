@@ -4,5 +4,8 @@
         "**/.git/subtree-cache/**": true,
         "**/node_modules/**": true,
         "**/target/**": true
+    },
+    "files.associations": {
+        "**/templates/**": "tera"
     }
 }

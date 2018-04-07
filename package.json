@@ -1,0 +1,28 @@
+{
+  "name": "panopticon",
+  "version": "0.1.0",
+  "main": "src/main.rs",
+  "repository": "git@github.com:andreasots/panopticon.git",
+  "author": "Andreas Ots <qrpth@qrpth.eu>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@material/button": "^0.33.0",
+    "@material/form-field": "^0.34.1",
+    "@material/layout-grid": "^0.34.0",
+    "@material/textfield": "^0.34.1",
+    "@material/top-app-bar": "^0.34.1",
+    "@types/material__textfield": "^0.26.0"
+  },
+  "devDependencies": {
+    "css-loader": "^0.28.11",
+    "extract-loader": "^2.0.1",
+    "file-loader": "^1.1.11",
+    "node-sass": "^4.8.3",
+    "sass-loader": "^6.0.7",
+    "ts-loader": "^2.3.7",
+    "typescript": "^2.8.1",
+    "webpack": "3",
+    "webpack-dev-server": "2",
+    "webpack-manifest-plugin": "^2.0.0-rc.2"
+  }
+}

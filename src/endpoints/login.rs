@@ -2,63 +2,51 @@ use diesel::prelude::*;
 use futures::{Future, IntoFuture};
 use gotham::handler::{HandlerFuture, IntoHandlerError};
 use gotham::middleware::session::SessionData;
+use gotham::http::response::create_response;
 use gotham::state::State;
-use gotham_serde_json_body_parser::JSONBody;
 use hyper::{Response, StatusCode};
 use hyper::header::ContentType;
+use tera::Context;
+use hyper::mime::TEXT_HTML;
 
 use middleware::diesel::DieselPool;
+use middleware::request::Request;
+use middleware::templates::Templates;
 use models::User;
 use ::Session;
 
-#[derive(Deserialize)]
-struct LoginRequest {
-    user: String,
-    password: String,
+pub fn form(state: State) -> Box<HandlerFuture> {
+    let response = try_h!(state, state.borrow::<Templates>().render("login.html", &Context::new()));
+    let response = create_response(&state, StatusCode::Ok, Some((response.into_bytes(), TEXT_HTML)));
+    Box::new(Ok((state, response)).into_future())
 }
 
-pub fn login_handler(state: State) -> Box<HandlerFuture> {
+pub fn login(state: State) -> Box<HandlerFuture> {/*
     use schema::users::dsl::*;
 
-    let conn = match state.borrow::<DieselPool>().get() {
-        Ok(conn) => conn,
-        Err(err) => return Box::new(Err((state, err.into_handler_error())).into_future()),
+    let conn = try_h!(state, state.borrow::<DieselPool>().get());
+
+    let req = state.borrow::<Request>();
+
+    let user = match try_h!(state, users.filter(name.eq(&req.get_first("username")).first::<User>(&conn).optional())) {
+        Some(user) => user,
+        None => return Box::new(Ok(state, Response::new().with_status(StatusCode::Forbidden).with_header(ContentType::json()).with_body(json_str!({"errors": ["Incorrect username or password."]}))).into_future()),
     };
 
-    Box::new(state.json::<LoginRequest>()
-        .and_then(move |(mut state, req)| {
-            let user = match users.filter(name.eq(&req.user)).first::<User>(&conn).optional() {
-                Ok(Some(user)) => user,
-                Ok(None) => return Ok((state, Response::new().with_status(StatusCode::Forbidden).with_header(ContentType::json()).with_body(json_str!({"errors": ["Incorrect username or password."]})))),
-                Err(err) => return Err((state, err.into_handler_error())),
-            };
+    match user.verify_password(&req.get_first("password")) {
+        Ok(()) => (),
+        Err(()) => return Box::new(Ok((state, Response::new().with_status(StatusCode::Forbidden).with_header(ContentType::json()).with_body(json_str!({"errors": ["Incorrect username or password."]})))).into_future()),
+    }
 
-            match user.verify_password(&req.password) {
-                Ok(()) => (),
-                Err(()) => return Ok((state, Response::new().with_status(StatusCode::Forbidden).with_header(ContentType::json()).with_body(json_str!({"errors": ["Incorrect username or password."]})))),
-            }
-
-            state.borrow_mut::<SessionData<Session>>().user_id = Some(user.id);
-
-            Ok((state, Response::new().with_status(StatusCode::NoContent)))
-        }))
+    state.borrow_mut::<SessionData<Session>>().user_id = Some(user.id);
+*/
+    let response = create_response(&state, StatusCode::NoContent, None);
+    Box::new(Ok((state, response)).into_future())
 }
 
-pub fn logout_handler(mut state: State) -> (State, Response) {
+pub fn logout(mut state: State) -> (State, Response) {
     state.borrow_mut::<SessionData<Session>>().user_id = None;
 
-    (state, Response::new().with_status(StatusCode::NoContent))
-}
-
-pub fn logged_in_handler(state: State) -> (State, Response) {
-    let is_logged_in = state.borrow::<SessionData<Session>>().user_id.is_some();
-    (state, if is_logged_in {
-        Response::new()
-            .with_status(StatusCode::NoContent)
-    } else {
-        Response::new()
-            .with_status(StatusCode::Forbidden)
-            .with_header(ContentType::json())
-            .with_body(json_str!({"errors": ["Not logged in."]}))
-    })
+    let response = create_response(&state, StatusCode::NoContent, None);
+    (state, response)
 }
