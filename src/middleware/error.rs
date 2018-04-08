@@ -6,13 +6,11 @@ use futures::Future;
 use std::error::Error;
 
 #[derive(Clone, NewMiddleware, StateData)]
-pub struct ErrorMiddleware {
-}
+pub struct ErrorMiddleware {}
 
 impl ErrorMiddleware {
     pub fn new() -> ErrorMiddleware {
-        ErrorMiddleware {
-        }
+        ErrorMiddleware {}
     }
 }
 
@@ -21,12 +19,10 @@ impl Middleware for ErrorMiddleware {
     where
         Chain: FnOnce(State) -> Box<HandlerFuture> + 'static,
     {
-        Box::new(chain(state)
-            .map_err(|(state, err)| {
-                error!(logger(), "error while processing request"; "error" => ?err.cause());
+        Box::new(chain(state).map_err(|(state, err)| {
+            error!(logger(), "error while processing request"; "error" => ?err.cause());
 
-                (state, err)
-            })
-        )
+            (state, err)
+        }))
     }
 }

@@ -5,31 +5,36 @@ use gotham::state::State;
 use gotham::handler::{HandlerError, HandlerFuture, IntoHandlerError};
 use gotham::middleware::session::SessionData;
 
-use ::Session;
+use Session;
 use models::User;
 use middleware::diesel::DieselPool;
 
 #[derive(NewMiddleware, Clone)]
-pub struct UserMiddleware {
-}
+pub struct UserMiddleware {}
 
 impl UserMiddleware {
     pub fn new() -> UserMiddleware {
-        UserMiddleware {
-        }
+        UserMiddleware {}
     }
 
     fn get_user(&self, state: &State) -> Result<Option<User>, HandlerError> {
         use schema::users::dsl::*;
 
-        let user_id = match state.try_borrow::<SessionData<Session>>().and_then(|session| session.user_id) {
+        let user_id = match state
+            .try_borrow::<SessionData<Session>>()
+            .and_then(|session| session.user_id)
+        {
             Some(user_id) => user_id,
             None => return Ok(None),
         };
 
-        let conn = state.borrow::<DieselPool>().get().map_err(IntoHandlerError::into_handler_error)?;
+        let conn = state
+            .borrow::<DieselPool>()
+            .get()
+            .map_err(IntoHandlerError::into_handler_error)?;
 
-        users.filter(id.eq(user_id))
+        users
+            .filter(id.eq(user_id))
             .first::<User>(&conn)
             .optional()
             .map_err(IntoHandlerError::into_handler_error)

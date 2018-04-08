@@ -1,8 +1,13 @@
-#[macro_use] extern crate gotham_derive;
-#[macro_use] extern crate serde_derive;
-#[macro_use] extern crate diesel;
-#[macro_use] extern crate slog;
-#[macro_use] extern crate serde_json;
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate gotham_derive;
+#[macro_use]
+extern crate serde_derive;
+#[macro_use]
+extern crate serde_json;
+#[macro_use]
+extern crate slog;
 
 extern crate argon2rs;
 extern crate chrono;
@@ -19,8 +24,8 @@ extern crate slog_scope;
 extern crate slog_stdlog;
 extern crate slog_term;
 extern crate tera;
-extern crate url;
 extern crate tokio_core;
+extern crate url;
 
 use gotham::router::builder::DrawRoutes;
 use gotham::router::builder::DefineSingleRoute;
@@ -32,7 +37,12 @@ macro_rules! try_h {
         let result = $e;
         match result {
             Ok(o) => o,
-            Err(e) => return Box::new(::futures::IntoFuture::into_future(Err(($state, ::gotham::handler::IntoHandlerError::into_handler_error(e))))),
+            Err(e) => return Box::new(::futures::IntoFuture::into_future(Err(
+                (
+                    $state,
+                    ::gotham::handler::IntoHandlerError::into_handler_error(e),
+                )
+            ))),
         }
     })
 }
@@ -87,7 +97,10 @@ impl Context {
     }
 
     pub fn set<T: serde::Serialize, S: Into<String>>(&mut self, key: S, value: T) {
-        self.extra.insert(key.into(), tera::to_value(value).expect("failed to convert to a Value"));
+        self.extra.insert(
+            key.into(),
+            tera::to_value(value).expect("failed to convert to a Value"),
+        );
     }
 }
 
@@ -97,8 +110,14 @@ struct Authenticated<T>(T);
 impl<T: gotham::handler::Handler> gotham::handler::Handler for Authenticated<T> {
     fn handle(self, state: gotham::state::State) -> Box<gotham::handler::HandlerFuture> {
         if state.try_borrow::<models::User>().is_none() {
-            let response = gotham::http::response::create_response(&state, hyper::StatusCode::SeeOther, None);
-            Box::new(Ok((state, response.with_header(hyper::header::Location::new("/login")))).into_future())
+            let response =
+                gotham::http::response::create_response(&state, hyper::StatusCode::SeeOther, None);
+            Box::new(
+                Ok((
+                    state,
+                    response.with_header(hyper::header::Location::new("/login")),
+                )).into_future(),
+            )
         } else {
             self.0.handle(state)
         }
@@ -114,31 +133,49 @@ fn main() {
     let _scope_guard = slog_scope::set_global_logger(logger);
     let _log_guard = slog_stdlog::init().unwrap();
 
-
     gotham::start("[::1]:5200", || {
         let pool = diesel::r2d2::Pool::builder()
-            .build(diesel::r2d2::ConnectionManager::new("postgresql:///panopticon"))
+            .build(diesel::r2d2::ConnectionManager::new(
+                "postgresql:///panopticon",
+            ))
             .unwrap();
 
         let (chain, pipelines) = gotham::pipeline::single::single_pipeline(
-                gotham::pipeline::new_pipeline()
-                    .add(middleware::error::ErrorMiddleware::new())
-                    .add(middleware::diesel::DieselMiddleware::new(pool.clone()))
-                    .add(middleware::request::RequestParser::new())
-                    .add(middleware::templates::Templates::new("templates/*").expect("failed to load templates"))
-                    .add(gotham::middleware::session::NewSessionMiddleware::new(session_backend::PostgresBackend::new(pool.clone())).insecure().with_session_type::<Session>())
-                    .add(middleware::csrf::CsrfMiddleware::new())
-                    .add(middleware::user::UserMiddleware::new())
-                    .build()
-            );
+            gotham::pipeline::new_pipeline()
+                .add(middleware::error::ErrorMiddleware::new())
+                .add(middleware::diesel::DieselMiddleware::new(pool.clone()))
+                .add(middleware::request::RequestParser::new())
+                .add(
+                    middleware::templates::Templates::new("templates/*")
+                        .expect("failed to load templates"),
+                )
+                .add(
+                    gotham::middleware::session::NewSessionMiddleware::new(
+                        session_backend::PostgresBackend::new(pool.clone()),
+                    ).insecure()
+                        .with_session_type::<Session>(),
+                )
+                .add(middleware::csrf::CsrfMiddleware::new())
+                .add(middleware::user::UserMiddleware::new())
+                .build(),
+        );
 
-        Ok(gotham::router::builder::build_router(chain, pipelines, |router| {
-            router.get("/login").to(endpoints::login::form);
-            router.post("/login").to(endpoints::login::login);
-            router.post("/logout").to(endpoints::login::logout);
-            router.get("/static/:file").with_path_extractor::<endpoints::static_files::PathParams>().to(endpoints::static_files::static_files);
-            router.get("/").to(Authenticated(endpoints::search::index));
-            router.post("/").to(Authenticated(endpoints::search::search));
-        }))
+        Ok(gotham::router::builder::build_router(
+            chain,
+            pipelines,
+            |router| {
+                router.get("/login").to(endpoints::login::form);
+                router.post("/login").to(endpoints::login::login);
+                router.post("/logout").to(endpoints::login::logout);
+                router
+                    .get("/static/:file")
+                    .with_path_extractor::<endpoints::static_files::PathParams>()
+                    .to(endpoints::static_files::static_files);
+                router.get("/").to(Authenticated(endpoints::search::index));
+                router
+                    .post("/")
+                    .to(Authenticated(endpoints::search::search));
+            },
+        ))
     });
 }

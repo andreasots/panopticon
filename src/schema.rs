@@ -30,8 +30,4 @@ table! {
 
 joinable!(audit_log -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(
-    audit_log,
-    sessions,
-    users,
-);
+allow_tables_to_appear_in_same_query!(audit_log, sessions, users,);

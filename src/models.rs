@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use schema::{audit_log, sessions, users};
 
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 
 #[derive(Identifiable, Queryable, Debug)]
 pub struct Session {
@@ -12,7 +12,7 @@ pub struct Session {
 }
 
 #[derive(Insertable, Debug)]
-#[table_name="sessions"]
+#[table_name = "sessions"]
 pub struct NewSession<'a> {
     pub id: &'a str,
     pub data: &'a [u8],
@@ -32,7 +32,10 @@ pub struct User {
 
 impl User {
     pub fn verify_password(&self, password: &str) -> Result<(), ()> {
-        if ::argon2rs::verifier::Encoded::from_u8(&self.password).expect("failed to decode password hash").verify(password.as_bytes()) {
+        if ::argon2rs::verifier::Encoded::from_u8(&self.password)
+            .expect("failed to decode password hash")
+            .verify(password.as_bytes())
+        {
             Ok(())
         } else {
             Err(())
@@ -40,13 +43,12 @@ impl User {
     }
 
     pub fn has_group(&self, group: &str) -> bool {
-        self.groups.iter()
-            .any(|user_group| user_group == group)
+        self.groups.iter().any(|user_group| user_group == group)
     }
 }
 
 #[derive(Insertable, Debug)]
-#[table_name="users"]
+#[table_name = "users"]
 pub struct NewUser<'a> {
     pub name: &'a str,
     pub password: Vec<u8>,
@@ -65,12 +67,18 @@ impl<'a> NewUser<'a> {
     fn hash_password(name: &str, password: &str) -> Vec<u8> {
         let mut salt = vec![0u8; 32];
         thread_rng().fill(&mut salt[..]);
-        ::argon2rs::verifier::Encoded::new(::argon2rs::Argon2::default(::argon2rs::Variant::Argon2id), password.as_bytes(), &salt, &[], name.as_bytes()).to_u8()
+        ::argon2rs::verifier::Encoded::new(
+            ::argon2rs::Argon2::default(::argon2rs::Variant::Argon2id),
+            password.as_bytes(),
+            &salt,
+            &[],
+            name.as_bytes(),
+        ).to_u8()
     }
 }
 
 #[derive(Insertable, Debug)]
-#[table_name="audit_log"]
+#[table_name = "audit_log"]
 pub struct NewAuditLogEntry<'a> {
     pub user_id: i64,
     pub index: &'a str,

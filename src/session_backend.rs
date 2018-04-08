@@ -23,13 +23,21 @@ impl PostgresBackend {
     }
 
     fn get_conn(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>, SessionError> {
-        self.pool.0.get()
-            .map_err(|err| SessionError::Backend(format!("failed to check out a connection from the pool: {}", err)))
+        self.pool.0.get().map_err(|err| {
+            SessionError::Backend(format!(
+                "failed to check out a connection from the pool: {}",
+                err
+            ))
+        })
     }
 }
 
 impl Backend for PostgresBackend {
-    fn persist_session(&self, identifier: SessionIdentifier, content: &[u8]) -> Result<(), SessionError> {
+    fn persist_session(
+        &self,
+        identifier: SessionIdentifier,
+        content: &[u8],
+    ) -> Result<(), SessionError> {
         use schema::sessions::dsl::*;
 
         debug!(logger(), "Persisting session"; "session-id" => &identifier.value);
@@ -49,21 +57,28 @@ impl Backend for PostgresBackend {
         Ok(())
     }
 
-    fn read_session(&self, identifier: SessionIdentifier) -> Box<Future<Item=Option<Vec<u8>>, Error=SessionError>> {
+    fn read_session(
+        &self,
+        identifier: SessionIdentifier,
+    ) -> Box<Future<Item = Option<Vec<u8>>, Error = SessionError>> {
         use schema::sessions::dsl::*;
 
         debug!(logger(), "Loading session"; "session-id" => &identifier.value);
 
-        Box::new(self.get_conn()
-            .into_future()
-            .and_then(move |conn|
-                sessions.filter(id.eq(&identifier.value))
-                    .first::<Session>(&conn)
-                    .optional()
-                    .map_err(|err| SessionError::Backend(format!("failed to read session: {}", err)))
-            )
-            .map(|session| session.map(|session| session.data))
-        ) as Box<Future<Item=Option<Vec<u8>>, Error=SessionError>>
+        Box::new(
+            self.get_conn()
+                .into_future()
+                .and_then(move |conn| {
+                    sessions
+                        .filter(id.eq(&identifier.value))
+                        .first::<Session>(&conn)
+                        .optional()
+                        .map_err(|err| {
+                            SessionError::Backend(format!("failed to read session: {}", err))
+                        })
+                })
+                .map(|session| session.map(|session| session.data)),
+        ) as Box<Future<Item = Option<Vec<u8>>, Error = SessionError>>
     }
 
     fn drop_session(&self, identifier: SessionIdentifier) -> Result<(), SessionError> {

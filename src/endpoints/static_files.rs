@@ -40,13 +40,20 @@ pub fn static_files(state: State) -> Box<HandlerFuture> {
 
     let ret = match read_file(&path) {
         Ok(content) => {
-            let response = create_response(&state, StatusCode::Ok, Some((content, guess_mime_type(&path))));
+            let response = create_response(
+                &state,
+                StatusCode::Ok,
+                Some((content, guess_mime_type(&path))),
+            );
 
             Ok((state, response))
-        },
+        }
         Err(err) => {
             if err.kind() == ErrorKind::NotFound {
-                Err((state, err.into_handler_error().with_status(StatusCode::NotFound)))
+                Err((
+                    state,
+                    err.into_handler_error().with_status(StatusCode::NotFound),
+                ))
             } else {
                 Err((state, err.into_handler_error()))
             }

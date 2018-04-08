@@ -17,20 +17,19 @@ pub struct Request {
 
 impl Request {
     pub fn get_first(&self, key: &str) -> Option<&str> {
-        self.data.get(key)
+        self.data
+            .get(key)
             .and_then(|values| values.get(0))
             .map(String::as_str)
     }
 }
 
 #[derive(Clone, NewMiddleware)]
-pub struct RequestParser {
-}
+pub struct RequestParser {}
 
 impl RequestParser {
     pub fn new() -> RequestParser {
-        RequestParser {
-        }
+        RequestParser {}
     }
 }
 
@@ -39,30 +38,33 @@ impl Middleware for RequestParser {
     where
         Chain: FnOnce(State) -> Box<HandlerFuture> + 'static,
     {
-        if state.borrow::<Headers>().get::<ContentType>() == Some(&ContentType::form_url_encoded()) {
-            Box::new(state.take::<Body>()
-                .fold(vec![], |mut req, chunk| -> Result<Vec<u8>, HyperError> { req.extend(chunk); Ok(req) })
-                .then(move |res| {
-                    match res {
+        if state.borrow::<Headers>().get::<ContentType>() == Some(&ContentType::form_url_encoded())
+        {
+            Box::new(
+                state
+                    .take::<Body>()
+                    .fold(vec![], |mut req, chunk| -> Result<Vec<u8>, HyperError> {
+                        req.extend(chunk);
+                        Ok(req)
+                    })
+                    .then(move |res| match res {
                         Ok(body) => {
                             let mut data = HashMap::new();
-                    
+
                             for (key, value) in form_urlencoded::parse(&body) {
                                 data.entry(key.to_string())
                                     .or_insert_with(Vec::new)
                                     .push(value.to_string());
                             }
 
-                            state.put(Request {
-                                data,
-                            });
+                            state.put(Request { data });
 
                             Ok(state)
-                        },
+                        }
                         Err(err) => Err((state, err.into_handler_error())),
-                    }
-                })
-                .and_then(chain))
+                    })
+                    .and_then(chain),
+            )
         } else {
             chain(state)
         }
