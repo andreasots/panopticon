@@ -2,6 +2,8 @@
 extern crate diesel;
 #[macro_use]
 extern crate gotham_derive;
+#[macro_use]
+extern crate serde_derive;
 
 extern crate argon2rs;
 extern crate chrono;
