@@ -4,11 +4,60 @@
     <meta charset="utf-8">
     <title>{% block title %}Panopticon{% endblock title %} - Panopticon</title>
     <link rel="stylesheet" href="{{ webpacked(name='static/style.scss') }}">
+    <link rel="stylesheet" href="https://lrrbot.mrphlip.com/static/archive.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     {% block style_extra %}{% endblock style_extra %}
   </head>
-  <body>
-    {% block content %}
-    {% endblock content %}
+  <body class="mdc-typography">
+    {% if user %}
+      <header class="mdc-top-app-bar">
+        <div class="mdc-top-app-bar__row">
+          <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+            <a href="#" class="material-icons mdc-top-app-bar__navigation-icon" onclick="return false">menu</a>
+            <span class="mdc-top-app-bar__title">Panopticon</span>
+          </section>
+        </div>
+      </header>
+
+    <aside class="mdc-drawer mdc-drawer--temporary" id="main-drawer">
+      <nav class="mdc-drawer__drawer">
+        <header class="mdc-drawer__header">
+          <div class="mdc-drawer__header-content mdc-theme--text-primary-on-primary mdc-theme--primary-bg">
+            <img src="/static/logo.svg" id="drawer-logo" alt="Panopticon">
+          </div>
+        </header>
+        <nav class="mdc-drawer__content mdc-list-group">
+          <div class="mdc-list">
+          </div>
+
+          <hr class="mdc-list-divider">
+
+          <div class="mdc-list">
+            <form class="mdc-list-item" action="/logout" method="post">
+              <input type="hidden" name="csrf-token" value="{{ csrf_token }}">
+              <button class="mdc-button" style="width: 100%">Log out</button>
+            </form>
+          </div>
+        </nav>
+      </nav>
+    </aside>
+    {% endif %}
+
+    <div class="mdc-snackbar" aria-live="assertive" aria-atomic="true" aria-hidden="true">
+      <div class="mdc-snackbar__text"></div>
+      <div class="mdc-snackbar__action-wrapper">
+        <button type="button" class="mdc-snackbar__action-button"></button>
+      </div>
+    </div>
+
+    <main>
+    {% block content %}{% endblock content %}
+    </main>
+
+    <script>
+      window.FLASHES = {{ flashes | safe | json_encode() }};
+    </script>
     <script src="{{ webpacked(name='material.js') }}"></script>
     {% block script_extra %}{% endblock script_extra %}
   </body>

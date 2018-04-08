@@ -28,6 +28,7 @@ module.exports = [
             },
             { loader: 'extract-loader' },
             { loader: 'css-loader' },
+            { loader: 'postcss-loader' },
             {
               loader: 'sass-loader',
               options: {
@@ -49,9 +50,10 @@ module.exports = [
   {
     entry: {
       material: './static/material.ts',
+      search: './static/search.ts',
     },
     output: {
-      filename: './static/material.[hash].js',
+      filename: './static/[name].[chunkhash].js',
     },
     plugins: [
       new ManifestPlugin({

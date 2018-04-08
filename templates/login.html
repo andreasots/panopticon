@@ -3,19 +3,34 @@
 {% block title %}Login{% endblock title %}
 
 {% block content %}
-<form action="/login" method="post">
-    <div class="mdc-text-field">
-        <input type="text" id="username" name="username" class="mdc-text-field__input" required>
-        <label class="mdc-floating-label" for="username">Username</label>
-        <div class="mdc-line-ripple"></div>
-    </div>
+<form action="/login" method="post" class="mdc-dialog mdc-dialog--open" role="alertdialog" aria-labelledby="login-label" aria-describedby="my-mdc-dialog-description">
+  <input type="hidden" name="csrf-token" value="{{ csrf_token }}">
+  <div class="mdc-dialog__surface" style="max-width: 300px">
+    <header class="mdc-dialog__header">
+      <h2 id="login-label" class="mdc_dialog__header__title">Log in</h2>
+    </header>
+    <section class="mdc-dialog__body">
+      <section>
+        <div class="mdc-text-field mdc-text-field--fullwidth">
+          <input type="text" id="username" name="username" class="mdc-text-field__input" required>
+          <label class="mdc-floating-label" for="username">Username</label>
+          <div class="mdc-line-ripple"></div>
+        </div>
+      </section>
 
-    <div class="mdc-text-field">
-        <input type="password" id="password" name="password" class="mdc-text-field__input" required>
-        <label class="mdc-floating-label" for="password">Password</label>
-        <div class="mdc-line-ripple"></div>
-    </div>
+      <section>
+        <div class="mdc-text-field mdc-text-field--fullwidth">
+          <input type="password" id="password" name="password" class="mdc-text-field__input" required>
+          <label class="mdc-floating-label" for="password">Password</label>
+          <div class="mdc-line-ripple"></div>
+        </div>
+      </section>
+    </section>
 
-    <button class="mdc-button" type="submit">Log in</button>
+    <footer class="mdc-dialog__footer">
+      <button class="mdc-button mdc-button--raised" type="submit">Log in</button>
+    </footer>
+  </div>
+  <div class="mdc-dialog__backdrop"></div>
 </form>
 {% endblock content %}

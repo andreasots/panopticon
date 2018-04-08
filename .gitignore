@@ -4,5 +4,6 @@
 /static/style.*.css
 /static/style.*.js
 /static/material.*.js
+/static/search.*.js
 /manifest.json
 /yarn-error.log

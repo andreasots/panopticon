@@ -25,7 +25,9 @@ fn main() {
     writeln!(out, ";").unwrap();
 
     println!("cargo:rerun-if-changed=package.json");
+    println!("cargo:rerun-if-changed=static/material.ts");
+    println!("cargo:rerun-if-changed=static/search.ts");
+    println!("cargo:rerun-if-changed=static/style.scss");
     println!("cargo:rerun-if-changed=webpack.config.js");
     println!("cargo:rerun-if-changed=yarn.lock");
-    println!("cargo:rerun-if-changed=static/style.scss");
 }

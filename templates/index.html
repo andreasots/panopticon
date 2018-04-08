@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Panopticon{% endblock title %}
+
+{% block content %}
+<form action="/" method="post">
+  <input type="hidden" name="csrf-token" value="{{ csrf_token }}">
+
+  <div class="mdc-layout-grid">
+    <div class="mdc-layout-grid__inner">
+
+      <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-2" style="padding: 8px 0 8px 0">
+        <div class="mdc-select" style="width: 100%">
+          <select class="mdc-select__native-control" name="index" required>
+            <option value="" selected disabled></option>
+            {% for idx in indices %}
+              <option value="{{ idx.0 }}"{% if index is defined and index == idx.0 %} selected{% endif %}>{{ idx.0 }}: {{ idx.1 }}</option>
+            {% endfor %}
+          </select>
+          <div class="mdc-select__label">Index</div>
+          <div class="mdc-select__bottom-line"></div>
+        </div>
+      </div>
+
+      <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-9">
+        <div class="mdc-text-field mdc-text-field--fullwidth">
+          <input type="text" id="query" name="query" class="mdc-text-field__input" required aria-controls="query-helper-text"{% if query is defined %} value="{{ query }}"{% endif %}>
+          <label class="mdc-floating-label" for="query">Query</label>
+          <div class="mdc-line-ripple"></div>
+        </div>
+        <p id="query-helper-text" class="mdc-text-field-helper-text" aria-hidden="true">
+          <a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.x/query-dsl-query-string-query.html#query-string-syntax">Uses lucene query syntax</a>
+        </p>
+      </div>
+
+      <div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-1" style="padding: 8px 0 8px 0">
+        <div style="padding: 10px">
+          <button class="mdc-button mdc-button--raised" type="submit" style="width: 100%">Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% if hits is defined %}
+  <ul class="mdc-list mdc-list--two-line">
+  {% for hit in hits %}
+    <li class="mdc-list-item">
+      <span class="mdc-list-item__text">
+        {{ hit.html | safe }}
+        <span class="mdc-list-item__secondary-text">
+          {{ hit.time | date(format="%Y-%m-%d %H:%M:%S%.f%:z") }}
+        </span>
+      </span>
+      <span class="mdc-list-item__meta">
+        <button class="mdc-button hit-details" data-hit="{{ hit | safe | json_encode() | escape }}">
+          <i class="material-icons" title="Details" aria-hidden="true">more_vert</i>
+        </button>
+      </span>
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+<aside id="details-dialog" class="mdc-dialog" role="alertdialog" aria-labelledby="details-dialog-label" aria-describedby="details-dialog-description">
+  <div class="mdc-dialog__surface">
+    <header class="mdc-dialog__header">
+      <h2 id="details-dialog-label" class="mdc-dialog__header__title">Message details</h2>
+    </header>
+    <section id="details-dialog-description" class="mdc-dialog__body mdc-dialog__body--scrollable">
+    </section>
+    <footer class="mdc-dialog__footer">
+      <button type="button" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--cancel">Dismiss</button>
+    </footer>
+  </div>
+  <div class="mdc-dialog__backdrop"></div>
+</aside>
+
+{% endblock content %}
+
+{% block script_extra %}
+  <script src="{{ webpacked(name='search.js') }}"></script>
+{% endblock script_extra %}

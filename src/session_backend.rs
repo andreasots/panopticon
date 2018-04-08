@@ -6,6 +6,7 @@ use futures::{Future, IntoFuture};
 use gotham::middleware::session::{Backend, NewBackend, SessionError, SessionIdentifier};
 use std::io::Error;
 use std::panic::AssertUnwindSafe;
+use slog_scope::logger;
 
 use models::{NewSession, Session};
 
@@ -31,6 +32,8 @@ impl Backend for PostgresBackend {
     fn persist_session(&self, identifier: SessionIdentifier, content: &[u8]) -> Result<(), SessionError> {
         use schema::sessions::dsl::*;
 
+        debug!(logger(), "Persisting session"; "session-id" => &identifier.value);
+
         let conn = self.get_conn()?;
         let new_session = NewSession {
             id: &identifier.value,
@@ -49,6 +52,8 @@ impl Backend for PostgresBackend {
     fn read_session(&self, identifier: SessionIdentifier) -> Box<Future<Item=Option<Vec<u8>>, Error=SessionError>> {
         use schema::sessions::dsl::*;
 
+        debug!(logger(), "Loading session"; "session-id" => &identifier.value);
+
         Box::new(self.get_conn()
             .into_future()
             .and_then(move |conn|
@@ -63,6 +68,8 @@ impl Backend for PostgresBackend {
 
     fn drop_session(&self, identifier: SessionIdentifier) -> Result<(), SessionError> {
         use schema::sessions::dsl::*;
+
+        debug!(logger(), "Droping session"; "session-id" => &identifier.value);
 
         let conn = self.get_conn()?;
         diesel::delete(sessions.filter(id.eq(&identifier.value)))

@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
     "outDir": "./static/",
+    "baseUrl": ".",
+    "paths": {
+      "@material/top-app-bar": ["node_modules/@material/top-app-bar/index"],
+      "@material/drawer": ["node_modules/@material/drawer/index"],
+    },
     "noImplicitAny": true,
     "module": "es6",
     "target": "es5",

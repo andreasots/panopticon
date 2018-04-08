@@ -1,15 +1,13 @@
-use futures::{Future, IntoFuture};
+use futures::IntoFuture;
 use gotham::handler::{HandlerFuture, IntoHandlerError};
-use gotham::middleware::session::SessionData;
 use gotham::http::response::create_response;
 use gotham::state::State;
-use hyper::{Response, StatusCode};
-use hyper::header::ContentType;
-use std::io::{Error, ErrorKind, Read};
-use std::fs::File;
-use std::path::Path;
 use hyper::mime::{self, Mime};
+use hyper::StatusCode;
 use std::ffi::OsStr;
+use std::fs::File;
+use std::io::{Error, ErrorKind, Read};
+use std::path::Path;
 
 #[derive(Deserialize, StateData, StaticResponseExtender)]
 pub struct PathParams {

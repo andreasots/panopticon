@@ -4,7 +4,6 @@ use gotham::state::State;
 use hyper::Body;
 use hyper::header::ContentType;
 use hyper::Headers;
-use std::ops::Deref;
 use url::form_urlencoded;
 use futures::{Future, Stream};
 use gotham::handler::IntoHandlerError;
